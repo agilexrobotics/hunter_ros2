@@ -59,7 +59,7 @@ bool HunterBaseRos::Initialize() {
 
   std::cout << "Robot base: Hunter" << std::endl;
   int version=2;
-  ProtocolDectctor detector;
+  ProtocolDetector detector;
   if (detector.Connect(port_name_)) {
     auto proto = detector.DetectProtocolVersion(5);
     if (proto == ProtocolVersion::AGX_V1) {
