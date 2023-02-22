@@ -114,7 +114,7 @@ class HunterMessenger {
     status_msg.linear_velocity = state.motion_state.linear_velocity;
     double phi =ConvertInnerAngleToCentral(state.motion_state.angular_velocity);
     status_msg.steering_angle = phi;
-    // status_msg.angular_velocity = state.motion_state.angular_velocity;
+    // status_msg.angular_velocity = state.motion_state.steering_angle;
 
     status_msg.vehicle_state = state.system_state.vehicle_state;
     status_msg.control_mode = state.system_state.control_mode;
