@@ -24,7 +24,7 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(tf2_geometry_msgs)
+find_package(tf2_geometry_msgs REQUIRED)
 
 find_package(hunter_msgs REQUIRED)
 find_package(ugv_sdk REQUIRED)
@@ -46,6 +46,7 @@ set(DEPENDENCIES
   "tf2_ros"
   "hunter_msgs"
   "sensor_msgs"
+  "tf2_geometry_msgs"
 )
 
 
