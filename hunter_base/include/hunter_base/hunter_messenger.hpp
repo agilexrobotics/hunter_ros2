@@ -18,7 +18,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <tf2_ros/transform_broadcaster.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include "ascent/Ascent.h"
 #include "ascent/Utility.h"
@@ -114,7 +114,7 @@ class HunterMessenger {
     status_msg.linear_velocity = state.motion_state.linear_velocity;
     double phi =ConvertInnerAngleToCentral(state.motion_state.steering_angle);
     status_msg.steering_angle = phi;
-    // status_msg.angular_velocity = state.motion_state.angular_velocity;
+    // status_msg.angular_velocity = state.motion_state.steering_angle;
 
     status_msg.vehicle_state = state.system_state.vehicle_state;
     status_msg.control_mode = state.system_state.control_mode;
