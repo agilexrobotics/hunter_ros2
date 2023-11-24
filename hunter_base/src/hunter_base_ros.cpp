@@ -58,7 +58,6 @@ void HunterBaseRos::LoadParameters() {
 bool HunterBaseRos::Initialize() {
 
   std::cout << "Robot base: Hunter" << std::endl;
-  int version=2;
   ProtocolDetector detector;
   if (detector.Connect(port_name_)) {
     auto proto = detector.DetectProtocolVersion(5);
@@ -96,6 +95,7 @@ void HunterBaseRos::Run() {
       messenger->SetTrack(HunterV1Params::track);
       messenger->SetWeelbase(HunterV1Params::wheelbase);
       messenger->SetMaxSteerAngleCentral(HunterV1Params::max_steer_angle_central);
+      messenger->SetMaxSteerAngle(HunterV1Params::max_steer_angle);
 
     }
     else
@@ -103,6 +103,7 @@ void HunterBaseRos::Run() {
       messenger->SetTrack(HunterV2Params::track);
       messenger->SetWeelbase(HunterV2Params::wheelbase);
       messenger->SetMaxSteerAngleCentral(HunterV2Params::max_steer_angle_central);
+      messenger->SetMaxSteerAngle(HunterV2Params::max_steer_angle);
     
     }
     
