@@ -70,7 +70,9 @@ class HunterMessenger {
   void SetMaxSteerAngleCentral(float Angle){
     max_steer_angle_central = Angle;
   }
-
+  void SetMaxSteerAngle(float Angle){
+    max_steer_angle = Angle;
+  }
   void SetSimulationMode(int loop_rate) {
     simulated_robot_ = true;
     sim_control_rate_ = loop_rate;
@@ -190,6 +192,7 @@ class HunterMessenger {
   double l = 0.0;
   double w = 0.0;
   double max_steer_angle_central = 0.0;
+  double max_steer_angle = 0.0;
 
   rclcpp::Time last_time_;
   rclcpp::Time current_time_;
@@ -211,13 +214,14 @@ class HunterMessenger {
     std::shared_ptr<HunterRobot> base;
     // base->SetMotionCommand
     
-    double steer_cmd = msg->angular.z;
-    if(steer_cmd > max_steer_angle_central)
-      steer_cmd = max_steer_angle_central;
-    if(steer_cmd < - max_steer_angle_central)
-        steer_cmd = - max_steer_angle_central;
+    // double steer_cmd = msg->angular.z;
+    // if(steer_cmd > max_steer_angle_central)
+    //   steer_cmd = max_steer_angle_central;
+    // if(steer_cmd < - max_steer_angle_central)
+    //     steer_cmd = - max_steer_angle_central;
     
-    double phi_i = ConvertCentralAngleToInner(steer_cmd); 
+    double radian = 0;
+    double phi_i = AngelVelocity2Angel(*msg,radian);
 
    std::cout << "set steering angle: " << phi_i << std::endl;
     hunter_->SetMotionCommand(msg->linear.x, phi_i);
@@ -328,6 +332,29 @@ class HunterMessenger {
     0.0,        0.0,        0.0,        0.0,        0.0,        1000.0};
 
     odom_pub_->publish(odom_msg);
+  }
+  double AngelVelocity2Angel(geometry_msgs::msg::Twist msg,double &radius)
+  {
+    double linear = fabs(msg.linear.x);
+    double angular = fabs(msg.angular.z);
+    if(angular == 0)
+    {
+      return 0.0;
+    }
+
+    radius = linear / angular;
+
+    int k = msg.angular.z / fabs(msg.angular.z);
+    if ((radius-l)<0 )
+    {
+      return  k*max_steer_angle;
+    }
+
+    double phi_i;
+    phi_i = atan(l/(radius-w/2));
+    if(msg.linear.x<0)
+      phi_i *= -1.0;
+    return k*phi_i;
   }
 };
 }  // namespace westonrobot
