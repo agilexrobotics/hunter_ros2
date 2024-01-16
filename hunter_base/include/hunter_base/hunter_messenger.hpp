@@ -212,18 +212,11 @@ class HunterMessenger {
   void SetHunterMotionCommand(const geometry_msgs::msg::Twist::SharedPtr &msg) {
 
     std::shared_ptr<HunterRobot> base;
-    // base->SetMotionCommand
-    
-    // double steer_cmd = msg->angular.z;
-    // if(steer_cmd > max_steer_angle_central)
-    //   steer_cmd = max_steer_angle_central;
-    // if(steer_cmd < - max_steer_angle_central)
-    //     steer_cmd = - max_steer_angle_central;
-    
+
     double radian = 0;
     double phi_i = AngelVelocity2Angel(*msg,radian);
 
-   std::cout << "set steering angle: " << phi_i << std::endl;
+    std::cout << "set steering angle: " << phi_i << std::endl;
     hunter_->SetMotionCommand(msg->linear.x, phi_i);
     // hunter_
  
@@ -274,7 +267,7 @@ class HunterMessenger {
     // perform numerical integration to get an estimation of pose
     double linear_speed_ = msg.linear_velocity;
     // double angular_speed = msg.angular_velocity;
-    double steering_angle_ = msg.steering_angle;
+    double steering_angle_ = ConvertInnerAngleToCentral(msg.steering_angle);
     // double lateral_speed = 0;
 
     asc::state_t state =
