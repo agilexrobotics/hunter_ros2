@@ -55,7 +55,7 @@ add_executable(hunter_base_node
     src/hunter_base_node.cpp
     src/bicycle_model.cpp)
 target_link_libraries(hunter_base_node ugv_sdk ${dependencies} ascent)
-ament_target_dependencies(hunter_base_node rclcpp tf2 tf2_ros std_msgs nav_msgs sensor_msgs hunter_msgs ${dependencies})
+ament_target_dependencies(hunter_base_node rclcpp tf2 tf2_ros tf2_geometry_msgs std_msgs nav_msgs sensor_msgs hunter_msgs ${dependencies})
 
 install(TARGETS hunter_base_node
   DESTINATION lib/${PROJECT_NAME})
