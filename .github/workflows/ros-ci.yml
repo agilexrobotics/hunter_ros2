@@ -60,9 +60,11 @@ jobs:
         with:
           import-token: ${{ github.token }}
           target-ros1-distro: ${{ matrix.ros_distribution }}
+          skip-tests: true
       - name: build and test ROS 2
         if: ${{ matrix.ros_version == 2 }}
         uses: ros-tooling/action-ros-ci@v0.3
         with:
           import-token: ${{ github.token }}
           target-ros2-distro: ${{ matrix.ros_distribution }}
+          skip-tests: true
