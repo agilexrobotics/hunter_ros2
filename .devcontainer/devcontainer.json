@@ -3,7 +3,7 @@
 {
 	"name": "L-CAS Humble",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "lcas.lincoln.ac.uk/lcas/ros:humble",
+	"image": "lcas.lincoln.ac.uk/lcas/devcontainer/hunter_ros2",
 	"dockerFile": "./Dockerfile",
 	"context": "..",
 
