@@ -8,7 +8,6 @@ RUN apt-get update \
     python3-pip \
     python3-rosdep
 
-
 # get the source tree and analyse it for its package.xml only
 FROM base as sourcefilter
 COPY . /tmp/src
@@ -23,6 +22,9 @@ RUN rosdep update && apt-get update
 RUN cd /tmp/src && rosdep install --from-paths . --ignore-src -r -y && cd && rm -rf /tmp/src
 
 FROM depbuilder as final
+# add user ros with sudo rights
+RUN useradd -ms /bin/bash ros && echo "ros:ros" | chpasswd && adduser ros sudo
+
 # add sudo without password
 RUN echo "ALL ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
