@@ -60,7 +60,7 @@ ament_target_dependencies(hunter_base_node rclcpp tf2 tf2_ros tf2_geometry_msgs 
 install(TARGETS hunter_base_node
   DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY launch
+install(DIRECTORY launch config
   DESTINATION share/${PROJECT_NAME}/)
 
 # install(DIRECTORY ascent
