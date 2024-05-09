@@ -81,8 +81,8 @@ class HunterMessenger {
   void SetupSubscription() {
     // odometry publisher
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
-    odom_pub_ =
-        node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 50);
+    // odom_pub_ =
+        // node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 50);
     status_pub_ = node_->create_publisher<hunter_msgs::msg::HunterStatus>(
         "/hunter_status", 10);
 
@@ -175,7 +175,7 @@ class HunterMessenger {
   std::mutex twist_mutex_;
   geometry_msgs::msg::Twist current_twist_;
 
-  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
+  // rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<hunter_msgs::msg::HunterStatus>::SharedPtr status_pub_;
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr motion_cmd_sub_;
@@ -324,7 +324,7 @@ class HunterMessenger {
     0.0,        0.0,        0.0,        0.0,        1000000.0,  0.0,
     0.0,        0.0,        0.0,        0.0,        0.0,        1000.0};
 
-    odom_pub_->publish(odom_msg);
+    // odom_pub_->publish(odom_msg);
   }
   double AngelVelocity2Angel(geometry_msgs::msg::Twist msg,double &radius)
   {
