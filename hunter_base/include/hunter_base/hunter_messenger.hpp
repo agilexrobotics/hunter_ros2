@@ -216,7 +216,7 @@ class HunterMessenger {
     double radian = 0;
     double phi_i = AngelVelocity2Angel(*msg,radian);
 
-    std::cout << "set steering angle: " << phi_i << std::endl;
+    // std::cout << "set steering angle: " << phi_i << std::endl;
     hunter_->SetMotionCommand(msg->linear.x, phi_i);
     // hunter_
  
