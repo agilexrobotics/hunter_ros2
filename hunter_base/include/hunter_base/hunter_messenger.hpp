@@ -80,9 +80,12 @@ class HunterMessenger {
 
   void SetupSubscription() {
     // odometry publisher
+    rclcpp::QoS qos_profile(rclcpp::KeepLast(1));
+    qos_profile.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
+    qos_profile.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
+    
     tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
-    odom_pub_ =
-        node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 50);
+    odom_pub_ = node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, qos_profile);
     status_pub_ = node_->create_publisher<hunter_msgs::msg::HunterStatus>(
         "/hunter_status", 10);
 
