@@ -23,9 +23,10 @@ Nvidia Jeston TX2/Xavier/XavierNX have CAN controller(s) integrated in the main 
 
     ```
     $ cd ~/ros2_ws/src
-    $ git clone https://github.com/agilexrobotics/ugv_sdk.git
-    $ git clone https://github.com/agilexrobotics/hunter_ros2.git
+    $ git clone https://github.com/LCAS/ugv_sdk.git
+    $ git clone https://github.com/LCAS/hunter_ros2.git
     $ cd ..
+    $ rosdep update && rosdep install --from-paths . -y -i
     $ colcon build
     ```
     
