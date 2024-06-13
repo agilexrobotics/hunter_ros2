@@ -96,7 +96,11 @@ void HunterBaseRos::Run() {
       messenger->SetWeelbase(HunterV1Params::wheelbase);
       messenger->SetMaxSteerAngleCentral(HunterV1Params::max_steer_angle_central);
       messenger->SetMaxSteerAngle(HunterV1Params::max_steer_angle);
-
+      std::cout<< "========== Vehicle params V1 ================"  << std::endl;
+      std::cout<< " track: " << HunterV1Params::track  << std::endl;
+      std::cout<< " wheelbase: " << HunterV1Params::wheelbase  << std::endl;
+      std::cout<< " max_steer_angle_central: " << HunterV1Params::max_steer_angle_central  << std::endl;
+      std::cout<< " max_steer_angle: " << HunterV1Params::max_steer_angle  << std::endl;
     }
     else
     {
@@ -104,8 +108,14 @@ void HunterBaseRos::Run() {
       messenger->SetWeelbase(HunterV2Params::wheelbase);
       messenger->SetMaxSteerAngleCentral(HunterV2Params::max_steer_angle_central);
       messenger->SetMaxSteerAngle(HunterV2Params::max_steer_angle);
-    
+      std::cout<< "========== Vehicle params V2 ================"  << std::endl;
+      std::cout<< " track: " << HunterV2Params::track  << std::endl;
+      std::cout<< " wheelbase: " << HunterV2Params::wheelbase  << std::endl;
+      std::cout<< " max_steer_angle_central: " << HunterV2Params::max_steer_angle_central  << std::endl;
+      std::cout<< " max_steer_angle: " << HunterV2Params::max_steer_angle  << std::endl;
     }
+
+    
     
     messenger->SetOdometryFrame(odom_frame_);
     messenger->SetBaseFrame(base_frame_);
