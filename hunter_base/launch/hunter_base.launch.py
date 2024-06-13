@@ -40,7 +40,10 @@ def generate_launch_description():
                 'odom_topic_name': launch.substitutions.LaunchConfiguration('odom_topic_name'),
                 'simulated_robot': launch.substitutions.LaunchConfiguration('simulated_robot'),
                 'control_rate': launch.substitutions.LaunchConfiguration('control_rate'),
-        }])
+        }],
+        remappings=[
+            ("/hunter/cmd_vel", "/diff_drive_controller/cmd_vel_unstamped"),
+        ])
 
     return LaunchDescription([
         use_sim_time_arg,
