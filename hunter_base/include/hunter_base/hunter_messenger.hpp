@@ -84,14 +84,14 @@ class HunterMessenger {
     qos_profile.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
     qos_profile.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
     
-    tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
+    // tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
     odom_pub_ = node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, qos_profile);
     status_pub_ = node_->create_publisher<hunter_msgs::msg::HunterStatus>(
         "/hunter_status", 10);
 
     // cmd subscriber
     motion_cmd_sub_ = node_->create_subscription<geometry_msgs::msg::Twist>(
-        "/cmd_vel", 10,
+        "/hunter/cmd_vel", 10,
         std::bind(&HunterMessenger::TwistCmdCallback, this,
                   std::placeholders::_1));
 
@@ -184,7 +184,7 @@ class HunterMessenger {
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr motion_cmd_sub_;
   
 
-  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  // std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
   // speed variables
   double position_x_ = 0.0;
