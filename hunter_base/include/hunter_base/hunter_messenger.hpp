@@ -104,7 +104,7 @@ class HunterMessenger {
                   std::placeholders::_1));
 
     odom_sub_ = node_->create_subscription<nav_msgs::msg::Odometry>(
-            "/hunter/global_odom", 10, std::bind(&HunterMessenger::odometryCallback, this, std::placeholders::_1));
+            "/hunter/global_odom", rclcpp::SensorDataQoS().keep_last(1), std::bind(&HunterMessenger::odometryCallback, this, std::placeholders::_1));
 
     parameter_event_sub_ = node_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
             "/parameter_events", 10, std::bind(&HunterMessenger::onParameterEvent, this, std::placeholders::_1));
@@ -113,7 +113,7 @@ class HunterMessenger {
 
   void PublishStateToROS() {
     current_time_ = node_->get_clock()->now();
-
+    last_time_control_law_ = node_->get_clock()->now();
     static bool init_run = true;
     if (init_run) {
       last_time_ = current_time_;
@@ -214,6 +214,7 @@ class HunterMessenger {
   double max_steer_angle = 0.0;
 
   rclcpp::Time last_time_;
+  rclcpp::Time last_time_control_law_;
   rclcpp::Time current_time_;
 
   double kp_v_, kd_v_, kp_w_, kd_w_;
@@ -262,15 +263,18 @@ class HunterMessenger {
 
   void controlLoop(double& len_vel, double& anu_vel) {
 
-    // auto current_time = this->now();
-    double dt = (current_time_ - last_time_).seconds();
-    // last_time_ = current_time;
+    auto current_time = node_->get_clock()->now();
+    double dt = 1.0/50.0;
+    // double dt = (current_time - last_time_control_law_).seconds();
+    last_time_control_law_ = current_time;
 
-    if (dt <= 0.0) {
+    if (dt < 0.0) {
         len_vel = 0.0;
         anu_vel = 0.0;
         return;
     }
+
+    // RCLCPP_INFO(node_->get_logger(), "control v_d_ :%f, v_ %f omega_d_ :%f, omega_ %f ", v_d_, v_, omega_d_, omega_);
 
     // compute the velocity and angular velocity errors
     double error_v = v_d_ - v_;
@@ -279,14 +283,20 @@ class HunterMessenger {
     // derivative of error (assuming discrete time implementation)
     double error_dot_v = (error_v - previous_error_v_) / dt;
     double error_dot_omega = (error_omega - previous_error_omega_) / dt;
+
+    // RCLCPP_INFO(node_->get_logger(), "error_v :%f, v_ %f error_omega :%f, error_dot_omega %f ", error_v, error_omega, error_dot_v, error_dot_omega);
     
     // PD control laws
     double a = kp_v_ * error_v + kd_v_ * error_dot_v;
     double alpha = kp_w_ * error_omega + kd_w_ * error_dot_omega;
+
+    // RCLCPP_INFO(node_->get_logger(), "a:%f, alpha %f  v_ %f ", a, alpha, v_);
     
     // Update the velocities
+    
     v_ += a * dt;
     omega_ += alpha * dt;
+    // RCLCPP_INFO(node_->get_logger(), "v_ %f, omega %f ", v_, omega_);
     
     // Update the previous errors
     previous_error_v_ = error_v;
@@ -308,8 +318,9 @@ class HunterMessenger {
     // double phi_i = AngelVelocity2Angel(*msg,radian);
     double phi_i = AngelVelocity2Angel(len_vel, anu_vel, radian);
 
-    // std::cout << "set steering angle: " << phi_i << std::endl;
-    hunter_->SetMotionCommand(msg->linear.x, phi_i);
+    // std::cout << "set steering angle: " << phi_i << " linear" << len_vel << std::endl;
+    // hunter_->SetMotionCommand(msg->linear.x, phi_i);
+    // phi_i = 0.0;
     hunter_->SetMotionCommand(len_vel, phi_i);
    
   }
