@@ -78,6 +78,13 @@ class HunterMessenger {
     sim_control_rate_ = loop_rate;
   }
 
+  void SetRegulatorParams(double kp_v, double kd_v, double kp_w, double kd_w) {
+    kp_v_ = kp_v;
+    kd_v_ = kd_v;
+    kp_w_ = kp_w;
+    kd_w_ = kd_w;
+  }
+
   void SetupSubscription() {
     // odometry publisher
     rclcpp::QoS qos_profile(rclcpp::KeepLast(1));
@@ -86,6 +93,7 @@ class HunterMessenger {
     
     // tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
     odom_pub_ = node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, qos_profile);
+
     status_pub_ = node_->create_publisher<hunter_msgs::msg::HunterStatus>(
         "/hunter_status", 10);
 
@@ -95,7 +103,12 @@ class HunterMessenger {
         std::bind(&HunterMessenger::TwistCmdCallback, this,
                   std::placeholders::_1));
 
-    
+    odom_sub_ = node_->create_subscription<nav_msgs::msg::Odometry>(
+            "/hunter/global_odom", 10, std::bind(&HunterMessenger::odometryCallback, this, std::placeholders::_1));
+
+    parameter_event_sub_ = node_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
+            "/parameter_events", 10, std::bind(&HunterMessenger::onParameterEvent, this, std::placeholders::_1));
+
   }
 
   void PublishStateToROS() {
@@ -182,6 +195,9 @@ class HunterMessenger {
   rclcpp::Publisher<hunter_msgs::msg::HunterStatus>::SharedPtr status_pub_;
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr motion_cmd_sub_;
+  rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
+  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr parameter_event_sub_;
+
   
 
   // std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
@@ -200,8 +216,17 @@ class HunterMessenger {
   rclcpp::Time last_time_;
   rclcpp::Time current_time_;
 
+  double kp_v_, kd_v_, kp_w_, kd_w_;
+  double v_, omega_;
+  double v_d_, omega_d_;
+  double previous_error_v_, previous_error_omega_;
+
+
   void TwistCmdCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
     
+    v_d_ = msg->linear.x;
+    omega_d_ = msg->angular.z;
+   
     if (!simulated_robot_) {
       SetHunterMotionCommand(msg);
     } else {
@@ -211,18 +236,82 @@ class HunterMessenger {
     // ROS_INFO("Cmd received:%f, %f", msg->linear.x, msg->angular.z);
   }
 
+  void odometryCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+        v_ = msg->twist.twist.linear.x;
+        omega_ = msg->twist.twist.angular.z;
+  }
+
+  void onParameterEvent(const rcl_interfaces::msg::ParameterEvent::SharedPtr event) {
+      for (auto & changed_parameter : event->changed_parameters) {
+          const std::string & name = changed_parameter.name;
+          if (name == "kp_v") {
+              kp_v_ = changed_parameter.value.double_value;
+              RCLCPP_INFO(node_->get_logger(), "Updated kp_v to: %f", kp_v_);
+          } else if (name == "kd_v") {
+              kd_v_ = changed_parameter.value.double_value;
+              RCLCPP_INFO(node_->get_logger(), "Updated kd_v to: %f", kd_v_);
+          } else if (name == "kp_w") {
+              kp_w_ = changed_parameter.value.double_value;
+              RCLCPP_INFO(node_->get_logger(), "Updated kp_w to: %f", kp_w_);
+          } else if (name == "kd_w") {
+              kd_w_ = changed_parameter.value.double_value;
+              RCLCPP_INFO(node_->get_logger(), "Updated kd_w to: %f", kd_w_);
+          }
+      }
+  }
+
+  void controlLoop(double& len_vel, double& anu_vel) {
+
+    // auto current_time = this->now();
+    double dt = (current_time_ - last_time_).seconds();
+    // last_time_ = current_time;
+
+    if (dt <= 0.0) {
+        len_vel = 0.0;
+        anu_vel = 0.0;
+        return;
+    }
+
+    // compute the velocity and angular velocity errors
+    double error_v = v_d_ - v_;
+    double error_omega = omega_d_ - omega_;
+    
+    // derivative of error (assuming discrete time implementation)
+    double error_dot_v = (error_v - previous_error_v_) / dt;
+    double error_dot_omega = (error_omega - previous_error_omega_) / dt;
+    
+    // PD control laws
+    double a = kp_v_ * error_v + kd_v_ * error_dot_v;
+    double alpha = kp_w_ * error_omega + kd_w_ * error_dot_omega;
+    
+    // Update the velocities
+    v_ += a * dt;
+    omega_ += alpha * dt;
+    
+    // Update the previous errors
+    previous_error_v_ = error_v;
+    previous_error_omega_ = error_omega;
+
+    len_vel = v_;
+    anu_vel = omega_;
+
+  }
+
+
   // template <typename T,std::enable_if_t<!std::is_base_of<HunterRobot, T>::value,bool> = true>
   void SetHunterMotionCommand(const geometry_msgs::msg::Twist::SharedPtr &msg) {
 
     std::shared_ptr<HunterRobot> base;
-
+    double len_vel, anu_vel;
+    controlLoop(len_vel, anu_vel);
     double radian = 0;
-    double phi_i = AngelVelocity2Angel(*msg,radian);
+    // double phi_i = AngelVelocity2Angel(*msg,radian);
+    double phi_i = AngelVelocity2Angel(len_vel, anu_vel, radian);
 
     // std::cout << "set steering angle: " << phi_i << std::endl;
     hunter_->SetMotionCommand(msg->linear.x, phi_i);
-    // hunter_
- 
+    hunter_->SetMotionCommand(len_vel, phi_i);
+   
   }
 
   double ConvertCentralAngleToInner(double angle)
@@ -242,6 +331,7 @@ class HunterMessenger {
     }
     return phi_i;
   }
+
   double ConvertInnerAngleToCentral(double angle)
   {
     double phi = 0;
@@ -329,6 +419,7 @@ class HunterMessenger {
 
     odom_pub_->publish(odom_msg);
   }
+  
   double AngelVelocity2Angel(geometry_msgs::msg::Twist msg,double &radius)
   {
     double linear = fabs(msg.linear.x);
@@ -349,6 +440,30 @@ class HunterMessenger {
     double phi_i;
     phi_i = atan(l/(radius-w/2));
     if(msg.linear.x<0)
+      phi_i *= -1.0;
+    return k*phi_i;
+  }
+
+  double AngelVelocity2Angel(double& linear_vel, double& angular_vel, double &radius)
+  {
+    double linear = fabs(linear_vel);
+    double angular = fabs(angular_vel);
+    if(angular == 0)
+    {
+      return 0.0;
+    }
+
+    radius = linear / angular;
+
+    int k = angular_vel / fabs(angular_vel);
+    if ((radius-l)<0 )
+    {
+      return  k*max_steer_angle;
+    }
+
+    double phi_i;
+    phi_i = atan(l/(radius-w/2));
+    if(linear_vel<0)
       phi_i *= -1.0;
     return k*phi_i;
   }

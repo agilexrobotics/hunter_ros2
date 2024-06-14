@@ -45,7 +45,7 @@ class HunterBaseRos : public rclcpp::Node {
   // std::shared_ptr<HunterMiniOmniRobot> omni_robot_;
 
   std::atomic<bool> keep_running_;
-
+  double kp_v_, kd_v_, kp_w_, kd_w_;
   void LoadParameters();
 };
 }  // namespace westonrobot

@@ -27,6 +27,17 @@ def generate_launch_description():
     sim_control_rate_arg = DeclareLaunchArgument('control_rate', default_value='50',
                                                  description='Simulation control loop update rate')
     
+    kp_v = LaunchConfiguration('kp_v', default='1.0')
+    kd_v = LaunchConfiguration('kd_v', default='0.1') 
+    kp_w = LaunchConfiguration('kp_w', default='1.0')
+    kd_w = LaunchConfiguration("kd_w", default="0.1")
+    
+    kp_v_val = DeclareLaunchArgument('kp_v', default_value=kp_v, description='kp_v')
+    kd_v_val = DeclareLaunchArgument('kd_v', default_value=kd_v, description='kd_v')
+    kp_w_val = DeclareLaunchArgument('kp_w', default_value=kp_w, description='kp_w')
+    kd_w_val = DeclareLaunchArgument('kd_w', default_value=kd_w, description='kd_w')
+
+    
     hunter_base_node = launch_ros.actions.Node(
         package='hunter_base',
         executable='hunter_base_node',
@@ -40,9 +51,14 @@ def generate_launch_description():
                 'odom_topic_name': launch.substitutions.LaunchConfiguration('odom_topic_name'),
                 'simulated_robot': launch.substitutions.LaunchConfiguration('simulated_robot'),
                 'control_rate': launch.substitutions.LaunchConfiguration('control_rate'),
+                'kp_v': kp_v,
+                'kd_v': kd_v,
+                'kp_w': kp_w,
+                'kd_w': kd_w,
         }],
         remappings=[
             ("/hunter/cmd_vel", "/diff_drive_controller/cmd_vel_unstamped"),
+            ("/hunter/global_odom", "/odometry/global")
         ])
 
     return LaunchDescription([
@@ -53,5 +69,9 @@ def generate_launch_description():
         odom_topic_arg,
         simulated_robot_arg,
         sim_control_rate_arg,
-        hunter_base_node
+        hunter_base_node,
+        kp_v_val,
+        kd_v_val,
+        kp_w_val,
+        kd_w_val
     ])
