@@ -124,10 +124,10 @@ class HunterMessenger {
 
   void PublishStateToROS() {
     current_time_ = node_->get_clock()->now();
-    last_time_control_law_ = node_->get_clock()->now();
     static bool init_run = true;
     if (init_run) {
       last_time_ = current_time_;
+      last_time_control_law_ = node_->get_clock()->now();
       init_run = false;
       return;
     }
@@ -278,8 +278,8 @@ class HunterMessenger {
   void controlLoop(double& len_vel, double& anu_vel) {
 
     auto current_time = node_->get_clock()->now();
-    double dt = 1.0/50.0;
-    // double dt = (current_time - last_time_control_law_).seconds();
+    // double dt = 1.0/sim_control_rate_;
+    double dt = (current_time - last_time_control_law_).seconds();
     last_time_control_law_ = current_time;
 
     if (dt < 0.0) {

@@ -99,7 +99,7 @@ void HunterBaseRos::Run() {
         std::unique_ptr<HunterMessenger<HunterRobot>>(
             new HunterMessenger<HunterRobot>(robot_, this));
 
-    if(version==1)
+    if(version == 1)
     {
       messenger->SetTrack(HunterV1Params::track);
       messenger->SetWeelbase(HunterV1Params::wheelbase);
