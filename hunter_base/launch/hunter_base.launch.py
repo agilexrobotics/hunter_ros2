@@ -26,6 +26,8 @@ def generate_launch_description():
                                                    description='Whether running with simulator')
     sim_control_rate_arg = DeclareLaunchArgument('control_rate', default_value='50',
                                                  description='Simulation control loop update rate')
+
+    enable_pd_regulator = LaunchConfiguration('enable_pd_regulator', default='True')
     
     kp_v = LaunchConfiguration('kp_v', default='40.0')
     kd_v = LaunchConfiguration('kd_v', default='0.1') 
@@ -36,7 +38,10 @@ def generate_launch_description():
     kd_v_val = DeclareLaunchArgument('kd_v', default_value=kd_v, description='kd_v')
     kp_w_val = DeclareLaunchArgument('kp_w', default_value=kp_w, description='kp_w')
     kd_w_val = DeclareLaunchArgument('kd_w', default_value=kd_w, description='kd_w')
-
+    
+    enable_pd_regulator = DeclareLaunchArgument('enable_pd_regulator'
+        , default_value=enable_pd_regulator
+        , description='Use PD regulator estimate residual control to the robot')
     
     hunter_base_node = launch_ros.actions.Node(
         package='hunter_base',
@@ -55,6 +60,7 @@ def generate_launch_description():
                 'kd_v': kd_v,
                 'kp_w': kp_w,
                 'kd_w': kd_w,
+                'enable_pd_regulator': enable_pd_regulator
         }],
         remappings=[
             ("/hunter/cmd_vel", "/diff_drive_controller/cmd_vel_unstamped"),

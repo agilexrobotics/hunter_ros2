@@ -78,11 +78,12 @@ class HunterMessenger {
     sim_control_rate_ = loop_rate;
   }
 
-  void SetRegulatorParams(double kp_v, double kd_v, double kp_w, double kd_w) {
+  void SetRegulatorParams(double kp_v, double kd_v, double kp_w, double kd_w, bool enable_pd_regulator) {
     kp_v_ = kp_v;
     kd_v_ = kd_v;
     kp_w_ = kp_w;
     kd_w_ = kd_w;
+    enable_pd_regulator_ = enable_pd_regulator;
   }
 
   void SetupSubscription() {
@@ -103,12 +104,15 @@ class HunterMessenger {
         std::bind(&HunterMessenger::TwistCmdCallback, this,
                   std::placeholders::_1));
 
-    odom_sub_ = node_->create_subscription<nav_msgs::msg::Odometry>(
+    if(enable_pd_regulator_){
+
+      odom_sub_ = node_->create_subscription<nav_msgs::msg::Odometry>(
             "/hunter/global_odom", rclcpp::SensorDataQoS().keep_last(1), std::bind(&HunterMessenger::odometryCallback, this, std::placeholders::_1));
 
-    parameter_event_sub_ = node_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
-            "/parameter_events", 10, std::bind(&HunterMessenger::onParameterEvent, this, std::placeholders::_1));
+      parameter_event_sub_ = node_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
+              "/parameter_events", 10, std::bind(&HunterMessenger::onParameterEvent, this, std::placeholders::_1));
 
+    }
   }
 
   void PublishStateToROS() {
@@ -218,6 +222,7 @@ class HunterMessenger {
   rclcpp::Time current_time_;
 
   double kp_v_, kd_v_, kp_w_, kd_w_;
+  bool enable_pd_regulator_;
   double v_, omega_;
   double v_d_, omega_d_;
   double previous_error_v_, previous_error_omega_;
@@ -310,19 +315,19 @@ class HunterMessenger {
 
   // template <typename T,std::enable_if_t<!std::is_base_of<HunterRobot, T>::value,bool> = true>
   void SetHunterMotionCommand(const geometry_msgs::msg::Twist::SharedPtr &msg) {
-
     std::shared_ptr<HunterRobot> base;
-    double len_vel, anu_vel;
-    controlLoop(len_vel, anu_vel);
-    double radian = 0;
-    // double phi_i = AngelVelocity2Angel(*msg,radian);
-    double phi_i = AngelVelocity2Angel(len_vel, anu_vel, radian);
-
-    // std::cout << "set steering angle: " << phi_i << " linear" << len_vel << std::endl;
-    // hunter_->SetMotionCommand(msg->linear.x, phi_i);
-    // phi_i = 0.0;
-    hunter_->SetMotionCommand(len_vel, phi_i);
-   
+    double radian = 0.0;
+    double phi_i = 0.0;
+    if(enable_pd_regulator_){
+      double len_vel, anu_vel;
+      controlLoop(len_vel, anu_vel);
+      phi_i = AngelVelocity2Angel(len_vel, anu_vel, radian);
+      hunter_->SetMotionCommand(len_vel, phi_i);
+    } else{
+      phi_i = AngelVelocity2Angel(*msg, radian);
+      hunter_->SetMotionCommand(msg->linear.x, phi_i);
+    }
+    // std::cout << "set steering angle: " << phi_i << std::endl;
   }
 
   double ConvertCentralAngleToInner(double angle)

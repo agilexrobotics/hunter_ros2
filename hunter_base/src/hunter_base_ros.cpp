@@ -27,6 +27,8 @@ HunterBaseRos::HunterBaseRos(std::string node_name)
   this->declare_parameter("simulated_robot", rclcpp::ParameterValue(false));
   this->declare_parameter("control_rate", rclcpp::ParameterValue(50));
 
+  
+  this->declare_parameter("enable_pd_regulator", true);
   this->declare_parameter("kp_v", 1.0);
   this->declare_parameter("kd_v", 0.1);
   this->declare_parameter("kp_w", 1.0);
@@ -44,6 +46,7 @@ void HunterBaseRos::LoadParameters() {
   this->get_parameter_or<bool>("simulated_robot", simulated_robot_, false);
   this->get_parameter_or<int>("control_rate", sim_control_rate_, 50);
 
+  enable_pd_regulator_ = this->get_parameter("enable_pd_regulator").as_bool();
   kp_v_ = this->get_parameter("kp_v").as_double();
   kd_v_ = this->get_parameter("kd_v").as_double();
   kp_w_ = this->get_parameter("kp_w").as_double();
@@ -121,7 +124,7 @@ void HunterBaseRos::Run() {
       std::cout<< " max_steer_angle: " << HunterV2Params::max_steer_angle  << std::endl;
     }
 
-    messenger->SetRegulatorParams(kp_v_, kd_v_, kp_w_, kd_w_);
+    messenger->SetRegulatorParams(kp_v_, kd_v_, kp_w_, kd_w_, enable_pd_regulator_);
     messenger->SetOdometryFrame(odom_frame_);
     messenger->SetBaseFrame(base_frame_);
     messenger->SetOdometryTopicName(odom_topic_name_);
