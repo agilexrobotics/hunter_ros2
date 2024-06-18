@@ -34,10 +34,10 @@ def generate_launch_description():
     kp_w = LaunchConfiguration('kp_w', default='12.0')
     kd_w = LaunchConfiguration("kd_w", default="0.1")
     
-    kp_v_val = DeclareLaunchArgument('kp_v', default_value=kp_v, description='kp_v')
-    kd_v_val = DeclareLaunchArgument('kd_v', default_value=kd_v, description='kd_v')
-    kp_w_val = DeclareLaunchArgument('kp_w', default_value=kp_w, description='kp_w')
-    kd_w_val = DeclareLaunchArgument('kd_w', default_value=kd_w, description='kd_w')
+    kp_v_val = DeclareLaunchArgument('kp_v', default_value=kp_v, description='Proportional gain for linear velocity')
+    kd_v_val = DeclareLaunchArgument('kd_v', default_value=kd_v, description='Derivative gain for linear velocity')
+    kp_w_val = DeclareLaunchArgument('kp_w', default_value=kp_w, description='Proportional gain for angular velocity')
+    kd_w_val = DeclareLaunchArgument('kd_w', default_value=kd_w, description='Derivative gain for angular velocity')
     
     enable_pd_regulator = DeclareLaunchArgument('enable_pd_regulator'
         , default_value=enable_pd_regulator

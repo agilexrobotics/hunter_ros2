@@ -77,7 +77,13 @@ class HunterMessenger {
     simulated_robot_ = true;
     sim_control_rate_ = loop_rate;
   }
-
+  
+  // Parameters:
+  // - kp_v: Proportional gain for linear velocity
+  // - kd_v: Derivative gain for linear velocity
+  // - kp_w: Proportional gain for angular velocity
+  // - kd_w: Derivative gain for angular velocity
+  // - enable_pd_regulator: Boolean flag to enable or disable the PD regulator
   void SetRegulatorParams(double kp_v, double kd_v, double kp_w, double kd_w, bool enable_pd_regulator) {
     kp_v_ = kp_v;
     kd_v_ = kd_v;
@@ -266,6 +272,8 @@ class HunterMessenger {
       }
   }
 
+
+  // define the control law
   void controlLoop(double& len_vel, double& anu_vel) {
 
     auto current_time = node_->get_clock()->now();
