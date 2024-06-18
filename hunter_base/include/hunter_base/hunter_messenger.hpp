@@ -113,7 +113,8 @@ class HunterMessenger {
     if(enable_pd_regulator_){
 
       odom_sub_ = node_->create_subscription<nav_msgs::msg::Odometry>(
-            "/hunter/global_odom", rclcpp::SensorDataQoS().keep_last(1), std::bind(&HunterMessenger::odometryCallback, this, std::placeholders::_1));
+            "/hunter/global_odom", rclcpp::SensorDataQoS().keep_last(1)
+            , std::bind(&HunterMessenger::odometryCallback, this, std::placeholders::_1));
 
       parameter_event_sub_ = node_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
               "/parameter_events", 10, std::bind(&HunterMessenger::onParameterEvent, this, std::placeholders::_1));
