@@ -278,8 +278,8 @@ class HunterMessenger {
   void controlLoop(double& len_vel, double& anu_vel) {
 
     auto current_time = node_->get_clock()->now();
-    // double dt = 1.0/sim_control_rate_;
-    double dt = (current_time - last_time_control_law_).seconds();
+    double dt = 1.0/sim_control_rate_;
+    // double dt = (current_time - last_time_control_law_).seconds();
     last_time_control_law_ = current_time;
 
     if (dt < 0.0) {
