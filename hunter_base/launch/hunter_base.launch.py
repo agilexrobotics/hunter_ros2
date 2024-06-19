@@ -39,7 +39,7 @@ def generate_launch_description():
     kp_w_val = DeclareLaunchArgument('kp_w', default_value=kp_w, description='Proportional gain for angular velocity')
     kd_w_val = DeclareLaunchArgument('kd_w', default_value=kd_w, description='Derivative gain for angular velocity')
     
-    enable_pd_regulator = DeclareLaunchArgument('enable_pd_regulator'
+    enable_pd_regulator_val = DeclareLaunchArgument('enable_pd_regulator'
         , default_value=enable_pd_regulator
         , description='Use PD regulator estimate residual control to the robot')
     
@@ -76,6 +76,7 @@ def generate_launch_description():
         simulated_robot_arg,
         sim_control_rate_arg,
         hunter_base_node,
+        enable_pd_regulator_val,
         kp_v_val,
         kd_v_val,
         kp_w_val,
