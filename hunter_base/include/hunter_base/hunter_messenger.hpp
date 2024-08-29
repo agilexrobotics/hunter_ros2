@@ -80,7 +80,7 @@ class HunterMessenger {
 
   void SetupSubscription() {
     // odometry publisher
-    tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
+    // tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
     odom_pub_ =
         node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 50);
     status_pub_ = node_->create_publisher<hunter_msgs::msg::HunterStatus>(
@@ -112,7 +112,7 @@ class HunterMessenger {
     hunter_msgs::msg::HunterStatus status_msg;
 
     status_msg.header.stamp = current_time_;
-
+    state.motion_state.linear_velocity = state.motion_state.linear_velocity *0.9103;
     status_msg.linear_velocity = state.motion_state.linear_velocity;
     double phi =ConvertInnerAngleToCentral(state.motion_state.steering_angle);
     status_msg.steering_angle = phi;
@@ -149,10 +149,12 @@ class HunterMessenger {
           actuator.actuator_ls_state[i].driver_state;
     }
 
-    status_pub_->publish(status_msg);
-
     // publish odometry and tf
     PublishOdometryToROS(state.motion_state, dt);
+    status_msg.lateral_velocity = state.motion_state.lateral_velocity;
+    status_msg.angular_velocity = state.motion_state.angular_velocity;
+
+    status_pub_->publish(status_msg);
 
     // record time for next integration
     last_time_ = current_time_;
@@ -179,10 +181,7 @@ class HunterMessenger {
   rclcpp::Publisher<hunter_msgs::msg::HunterStatus>::SharedPtr status_pub_;
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr motion_cmd_sub_;
-  
-
-  std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
-
+  // std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   // speed variables
   double position_x_ = 0.0;
   double position_y_ = 0.0;
@@ -263,7 +262,7 @@ class HunterMessenger {
     return tf2::toMsg(q);
   }
 
-  void PublishOdometryToROS(const MotionStateMessage &msg, double dt) {
+  void PublishOdometryToROS(MotionStateMessage &msg, double dt) {
     // perform numerical integration to get an estimation of pose
     double linear_speed_ = msg.linear_velocity;
     // double angular_speed = msg.angular_velocity;
@@ -282,23 +281,23 @@ class HunterMessenger {
         createQuaternionMsgFromYaw(theta_);
 
     // publish tf transformation
-    geometry_msgs::msg::TransformStamped tf_msg;
-    tf_msg.header.stamp = current_time_;
-    tf_msg.header.frame_id = odom_frame_;
-    tf_msg.child_frame_id = base_frame_;
+    // geometry_msgs::msg::TransformStamped tf_msg;
+    // tf_msg.header.stamp = current_time_;
+    // tf_msg.header.frame_id = odom_frame_;
+    // tf_msg.child_frame_id = base_frame_;
 
-    tf_msg.transform.translation.x = position_x_;
-    tf_msg.transform.translation.y = position_y_;
-    tf_msg.transform.translation.z = 0.0;
-    tf_msg.transform.rotation = odom_quat;
+    // tf_msg.transform.translation.x = position_x_;
+    // tf_msg.transform.translation.y = position_y_;
+    // tf_msg.transform.translation.z = 0.0;
+    // tf_msg.transform.rotation = odom_quat;
 
-    tf_broadcaster_->sendTransform(tf_msg);
+    // tf_broadcaster_->sendTransform(tf_msg);
 
     // publish odometry and tf messages
     nav_msgs::msg::Odometry odom_msg;
     odom_msg.header.stamp = current_time_;
-    odom_msg.header.frame_id = odom_frame_;
-    odom_msg.child_frame_id = base_frame_;
+    odom_msg.header.frame_id = base_frame_;
+    odom_msg.child_frame_id = "";
 
     odom_msg.pose.pose.position.x = position_x_;
     odom_msg.pose.pose.position.y = position_y_;
