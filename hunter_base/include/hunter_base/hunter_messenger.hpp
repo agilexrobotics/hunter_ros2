@@ -151,8 +151,6 @@ class HunterMessenger {
 
     // publish odometry and tf
     PublishOdometryToROS(state.motion_state, dt);
-    status_msg.lateral_velocity = state.motion_state.lateral_velocity;
-    status_msg.angular_velocity = state.motion_state.angular_velocity;
 
     status_pub_->publish(status_msg);
 
