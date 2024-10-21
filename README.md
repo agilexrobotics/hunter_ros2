@@ -64,14 +64,14 @@ Nvidia Jeston TX2/Xavier/XavierNX have CAN controller(s) integrated in the main 
 * Then you can send command to the robot
     ```
     $ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "linear:
-    x: 0.0
+    x: 0.1
     y: 0.0
     z: 0.0
     angular:
     x: 0.0
     y: 0.0
-    z: 0.0" 
-
+    z: 0.1" 
+    
     ```
 
 **SAFETY PRECAUSION**: 
