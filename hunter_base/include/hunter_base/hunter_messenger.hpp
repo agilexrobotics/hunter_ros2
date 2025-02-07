@@ -30,6 +30,8 @@
 #include "hunter_msgs/msg/hunter_status.hpp"
 #include "hunter_msgs/msg/hunter_light_cmd.hpp"
 
+#include "sensor_msgs/msg/joint_state.hpp"
+
 namespace westonrobot {
 
 template <typename SystemModel>
@@ -100,6 +102,9 @@ class HunterMessenger {
     
     // tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(node_);
     odom_pub_ = node_->create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, qos_profile);
+
+    // joint state publisher
+    joint_state_pub_ = node_->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
 
     status_pub_ = node_->create_publisher<hunter_msgs::msg::HunterStatus>(
         "/hunter_status", 10);
@@ -181,6 +186,27 @@ class HunterMessenger {
     // publish odometry and tf
     PublishOdometryToROS(state.motion_state, dt);
 
+    // --- New Code: Publish Joint States ---
+    sensor_msgs::msg::JointState joint_state_msg;
+    joint_state_msg.header.stamp = current_time_;
+
+    // Set joint names as defined in your URDF/config
+    joint_state_msg.name.push_back("rear_left_wheel_joint");     // Traction joint
+    joint_state_msg.name.push_back("front_left_steering_joint");   // Steering joint
+
+    //convert linear velocity to position
+    static double wheel_position = 0.0;
+    wheel_position += state.motion_state.linear_velocity * dt;
+    double steering_position = state.motion_state.steering_angle;     // Or convert if needed
+
+    joint_state_msg.position.push_back(wheel_position);
+    joint_state_msg.position.push_back(steering_position);
+
+    // Optionally, if you have velocities:
+    // joint_state_msg.velocity.push_back(state.motion_state.linear_velocity);
+
+    joint_state_pub_->publish(joint_state_msg);
+
     // record time for next integration
     last_time_ = current_time_;
   }
@@ -204,6 +230,7 @@ class HunterMessenger {
 
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<hunter_msgs::msg::HunterStatus>::SharedPtr status_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
 
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr motion_cmd_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
