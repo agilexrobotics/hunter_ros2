@@ -474,33 +474,15 @@ class HunterMessenger {
   
   double AngelVelocity2Angel(geometry_msgs::msg::Twist msg,double &radius)
   {
-    double linear = fabs(msg.linear.x);
-    double angular = fabs(msg.angular.z);
-    if(angular == 0)
-    {
-      return 0.0;
-    }
-
-    radius = linear / angular;
-
-    int k = msg.angular.z / fabs(msg.angular.z);
-    if ((radius-l)<0 )
-    {
-      return  k*max_steer_angle;
-    }
-
-    double phi_i;
-    phi_i = atan(l/(radius-w/2));
-    if(msg.linear.x<0)
-      phi_i *= -1.0;
-    return k*phi_i;
+    return AngelVelocity2Angel(msg.linear.x, msg.angular.z, radius);
   }
 
   double AngelVelocity2Angel(double& linear_vel, double& angular_vel, double &radius)
   {
     double linear = fabs(linear_vel);
     double angular = fabs(angular_vel);
-    if(angular == 0)
+
+    if(angular < 0.001) // adding dead zone
     {
       return 0.0;
     }

@@ -27,7 +27,7 @@ def generate_launch_description():
     sim_control_rate_arg = DeclareLaunchArgument('control_rate', default_value='50',
                                                  description='Simulation control loop update rate')
 
-    enable_pd_regulator = LaunchConfiguration('enable_pd_regulator', default='True')
+    enable_pd_regulator = LaunchConfiguration('enable_pd_regulator', default='False')
     
     kp_v = LaunchConfiguration('kp_v', default='40.0')
     kd_v = LaunchConfiguration('kd_v', default='0.1') 
