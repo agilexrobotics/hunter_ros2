@@ -21,6 +21,8 @@ def generate_launch_description():
                                                 description='Base link frame id')
     odom_topic_arg = DeclareLaunchArgument('odom_topic_name', default_value='odom',
                                            description='Odometry topic name')
+    robot_model_arg = DeclareLaunchArgument('robot_model', default_value='hunter2',
+                                            description='Robot model: hunter2, hunter1, hunter_se')
 
     simulated_robot_arg = DeclareLaunchArgument('simulated_robot', default_value='false',
                                                    description='Whether running with simulator')
@@ -40,6 +42,7 @@ def generate_launch_description():
                 'odom_topic_name': launch.substitutions.LaunchConfiguration('odom_topic_name'),
                 'simulated_robot': launch.substitutions.LaunchConfiguration('simulated_robot'),
                 'control_rate': launch.substitutions.LaunchConfiguration('control_rate'),
+                'robot_model': launch.substitutions.LaunchConfiguration('robot_model'),
         }])
 
     return LaunchDescription([
@@ -50,5 +53,6 @@ def generate_launch_description():
         odom_topic_arg,
         simulated_robot_arg,
         sim_control_rate_arg,
+        robot_model_arg,
         hunter_base_node
     ])

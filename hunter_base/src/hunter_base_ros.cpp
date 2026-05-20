@@ -20,6 +20,7 @@ HunterBaseRos::HunterBaseRos(std::string node_name)
   this->declare_parameter("odom_frame", rclcpp::ParameterValue("odom"));
   this->declare_parameter("base_frame", rclcpp::ParameterValue("base_link"));
   this->declare_parameter("odom_topic_name", rclcpp::ParameterValue("odom"));
+  this->declare_parameter("robot_model", rclcpp::ParameterValue("hunter2"));
 
   this->declare_parameter("is_hunter_mini", rclcpp::ParameterValue(false));
   this->declare_parameter("is_omni_wheel", rclcpp::ParameterValue(false));
@@ -37,8 +38,7 @@ void HunterBaseRos::LoadParameters() {
   this->get_parameter_or<std::string>("base_frame", base_frame_, "base_link");
   this->get_parameter_or<std::string>("odom_topic_name", odom_topic_name_,
                                       "odom");
-
-
+  this->get_parameter_or<std::string>("robot_model", robot_model_, "hunter2");
 
   this->get_parameter_or<bool>("simulated_robot", simulated_robot_, false);
   this->get_parameter_or<int>("control_rate", sim_control_rate_, 50);
@@ -64,12 +64,9 @@ bool HunterBaseRos::Initialize() {
     if (proto == ProtocolVersion::AGX_V1) {
       std::cout << "Detected protocol: AGX_V1" << std::endl;
       robot_ = std::unique_ptr<HunterRobot>(new HunterRobot(ProtocolVersion::AGX_V1));
-        version = 1;
     } else if (proto == ProtocolVersion::AGX_V2) {
       std::cout << "Detected protocol: AGX_V2" << std::endl;
-         robot_ = std::unique_ptr<HunterRobot>(
-              new HunterRobot(ProtocolVersion::AGX_V2));
-        version = 2;
+      robot_ = std::unique_ptr<HunterRobot>(new HunterRobot(ProtocolVersion::AGX_V2));
     } else {
       std::cout << "Detected protocol: UNKONWN" << std::endl;
       return false;
@@ -90,21 +87,21 @@ void HunterBaseRos::Run() {
         std::unique_ptr<HunterMessenger<HunterRobot>>(
             new HunterMessenger<HunterRobot>(robot_, this));
 
-    if(version==1)
-    {
+    if (robot_model_ == "hunter_se") {
+      messenger->SetTrack(HunterSEParams::track);
+      messenger->SetWeelbase(HunterSEParams::wheelbase);
+      messenger->SetMaxSteerAngleCentral(HunterSEParams::max_steer_angle_central);
+      messenger->SetMaxSteerAngle(HunterSEParams::max_steer_angle);
+    } else if (robot_model_ == "hunter1") {
       messenger->SetTrack(HunterV1Params::track);
       messenger->SetWeelbase(HunterV1Params::wheelbase);
       messenger->SetMaxSteerAngleCentral(HunterV1Params::max_steer_angle_central);
       messenger->SetMaxSteerAngle(HunterV1Params::max_steer_angle);
-
-    }
-    else
-    {
+    } else {
       messenger->SetTrack(HunterV2Params::track);
       messenger->SetWeelbase(HunterV2Params::wheelbase);
       messenger->SetMaxSteerAngleCentral(HunterV2Params::max_steer_angle_central);
       messenger->SetMaxSteerAngle(HunterV2Params::max_steer_angle);
-    
     }
     
     messenger->SetOdometryFrame(odom_frame_);

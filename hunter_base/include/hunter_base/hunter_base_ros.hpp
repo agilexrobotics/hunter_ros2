@@ -32,14 +32,14 @@ class HunterBaseRos : public rclcpp::Node {
   std::string odom_frame_;
   std::string base_frame_;
   std::string odom_topic_name_;
+  std::string robot_model_;
 
   bool is_hunter_mini_ = false;
   bool is_omni_wheel_ = false;
 
   bool simulated_robot_ = false;
   int sim_control_rate_ = 50;
-  
-  int version=2;
+
   bool is_omni_ = false;
   std::shared_ptr<HunterRobot> robot_;
   // std::shared_ptr<HunterMiniOmniRobot> omni_robot_;
