@@ -33,9 +33,9 @@ struct HunterV2Params {
 
 struct HunterSEParams {
   static constexpr double track =
-      0.55;  // in meter (left & right wheel distance)
+      0.52;  // in meter (left & right wheel distance)
   static constexpr double wheelbase =
-      0.52;  // in meter (front & rear wheel distance)
+      0.55;  // in meter (front & rear wheel distance)
   static constexpr double wheel_radius = 0.1375;              // in meter
   static constexpr double transmission_reduction_rate = 30;  // 1:30
 
